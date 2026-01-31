@@ -1,81 +1,72 @@
-import { NavLink } from 'react-router-dom';
-import { FiHome, FiPlus, FiSettings, FiHelpCircle } from 'react-icons/fi';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { FiHome, FiPlus, FiSettings } from 'react-icons/fi';
 
-const Sidebar = ({ isSidebarOpen }) => {
-  const navItems = [
-    { to: '/dashboard', icon: FiHome, label: 'Dashboard' },
-    { to: '/add-resume', icon: FiPlus, label: 'Add Resume' },
-  ];
+const Sidebar = ({ isSidebarOpen, onClose }) => {
+  const navigate = useNavigate();
+
+  const handleAddResume = () => {
+    navigate('/dashboard?action=add');
+    onClose();
+  };
 
   return (
     <>
-      {/* Mobile overlay backdrop */}
+      {/* Backdrop - mobile only */}
       {isSidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-20 lg:hidden"
+          onClick={onClose}
         />
       )}
-      
+
       <aside
-        className={`fixed top-16 left-0 h-full w-64 bg-white dark:bg-dark-200 border-r border-gray-200 dark:border-dark-100 
-                    transform transition-transform duration-300 ease-in-out z-30
+        className={`fixed top-16 left-0 bottom-0 w-72 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800
+                    transform transition-transform duration-300 ease-in-out z-30 lg:z-auto
                     lg:relative lg:transform-none
                     ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
       >
-        <div className="flex flex-col h-full p-4">
-          {/* Navigation Links */}
-          <nav className="flex-1 space-y-2">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                    isActive
-                      ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30'
-                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-100'
-                  }`
-                }
-              >
-                <item.icon className="w-5 h-5" />
-                <span className="font-medium">{item.label}</span>
-              </NavLink>
-            ))}
-          </nav>
+        <div className="flex flex-col h-full">
+          <div className="flex-1 px-3 py-5 space-y-1.5 overflow-y-auto">
+            <NavLink
+              to="/dashboard"
+              onClick={onClose}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all ${
+                  isActive
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/30'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                }`
+              }
+            >
+              <FiHome className="w-5 h-5" />
+              Dashboard
+            </NavLink>
 
-          {/* Bottom Section */}
-          <div className="border-t border-gray-200 dark:border-dark-100 pt-4 space-y-2">
+            <button
+              onClick={handleAddResume}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+            >
+              <FiPlus className="w-5 h-5" />
+              New Resume
+            </button>
+          </div>
+
+          {/* Bottom section */}
+          <div className="px-3 py-5 border-t border-gray-200 dark:border-gray-800">
             <NavLink
               to="/settings"
+              onClick={onClose}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all ${
                   isActive
-                    ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-100'
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/30'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                 }`
               }
             >
               <FiSettings className="w-5 h-5" />
-              <span className="font-medium">Settings</span>
+              Settings
             </NavLink>
-            
-            <button
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-100 transition-all duration-200"
-            >
-              <FiHelpCircle className="w-5 h-5" />
-              <span className="font-medium">Help & Support</span>
-            </button>
-          </div>
-
-          {/* Upgrade Card */}
-          <div className="mt-4 p-4 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 text-white">
-            <h4 className="font-semibold mb-1">Resume Builder Pro</h4>
-            <p className="text-sm text-primary-100 mb-3">
-              Unlock premium templates and features
-            </p>
-            <button className="w-full py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors">
-              Upgrade Now
-            </button>
           </div>
         </div>
       </aside>

@@ -4,12 +4,11 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import Header from './components/Layout/Header';
-import Footer from './components/Layout/Footer';
 import Sidebar from './components/Layout/Sidebar';
+import Footer from './components/Layout/Footer';
 import Login from './components/Auth/Login';
 import Signup from './components/Auth/Signup';
 import Dashboard from './pages/Dashboard';
-import AddResume from './pages/AddResume';
 import EditResume from './pages/EditResume';
 import ViewResume from './pages/ViewResume';
 import AuthCallback from './pages/AuthCallback';
@@ -20,7 +19,7 @@ const ProtectedRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-dark-300">
+      <div className="h-screen flex items-center justify-center bg-gray-50 dark:bg-dark-300">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
       </div>
     );
@@ -38,17 +37,20 @@ const AuthenticatedLayout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-dark-300">
-      <Header isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
-      <Sidebar isSidebarOpen={isSidebarOpen} />
-      <main className={`pt-16 transition-all duration-300 min-h-screen ${
-        isSidebarOpen ? 'lg:ml-64' : ''
-      }`}>
-        <div className={`${isSidebarOpen ? 'lg:ml-0' : ''} transition-all duration-300`}>
-          {children}
-        </div>
-      </main>
-      <Footer />
+    <div className="h-screen flex flex-col overflow-hidden bg-gray-50 dark:bg-dark-300">
+      <Header 
+        isSidebarOpen={isSidebarOpen} 
+        setIsSidebarOpen={setIsSidebarOpen}
+      />
+      <div className="flex flex-1 overflow-hidden">
+        <Sidebar isSidebarOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+        <main className="flex-1 overflow-hidden flex flex-col">
+          <div className="flex-1 overflow-auto">
+            {children}
+          </div>
+          <Footer />
+        </main>
+      </div>
     </div>
   );
 };
@@ -65,8 +67,10 @@ const AuthenticatedLayoutWrapper = () => {
   // Determine which component to render based on path
   const getComponent = () => {
     const path = location.pathname;
-    if (path === '/dashboard' || path === '/settings') return <Dashboard />;
-    if (path === '/add-resume') return <AddResume />;
+    if (path === '/dashboard' || path === '/settings') {
+      return <Dashboard />;
+    }
+    if (path === '/add-resume') return <Dashboard />;
     if (path.startsWith('/edit-resume/')) return <EditResume />;
     if (path.startsWith('/view-resume/')) return <ViewResume />;
     return <Dashboard />;
@@ -84,7 +88,7 @@ const AppRoutes = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-dark-300">
+      <div className="h-screen flex items-center justify-center bg-gray-50 dark:bg-dark-300">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
       </div>
     );
@@ -117,6 +121,8 @@ const AppRoutes = () => {
           )
         }
       />
+      
+      {/* Auth Callback */}
       <Route path="/auth/callback" element={<AuthCallback />} />
 
       {/* Protected Routes */}
@@ -129,7 +135,7 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/add-resume"
+        path="/settings"
         element={
           <ProtectedRoute>
             <AuthenticatedLayoutWrapper />
@@ -152,42 +158,12 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/settings"
-        element={
-          <ProtectedRoute>
-            <AuthenticatedLayoutWrapper />
-          </ProtectedRoute>
-        }
-      />
 
-      {/* Redirect root to dashboard or login */}
-      <Route
-        path="/"
-        element={
-          isAuthenticated ? (
-            <Navigate to="/dashboard" replace />
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
-
+      {/* Redirect root to dashboard */}
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      
       {/* 404 */}
-      <Route
-        path="*"
-        element={
-          <UnauthenticatedLayout>
-            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-dark-300">
-              <div className="text-center">
-                <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">404</h1>
-                <p className="text-gray-600 dark:text-gray-400 mb-6">Page not found</p>
-                <a href="/login" className="btn-primary">Go to Login</a>
-              </div>
-            </div>
-          </UnauthenticatedLayout>
-        }
-      />
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
 };
@@ -201,7 +177,7 @@ const App = () => {
           <Toaster
             position="top-right"
             toastOptions={{
-              duration: 4000,
+              duration: 3000,
               style: {
                 background: '#fff',
                 color: '#363636',

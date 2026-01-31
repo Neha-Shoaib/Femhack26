@@ -3,6 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { FiArrowLeft, FiEdit2, FiDownload } from 'react-icons/fi';
 import { resumeOperations } from '../utils/supabaseClient';
 import ResumePreview from '../components/Resume/ResumePreview';
+import Footer from '../components/Layout/Footer';
 import toast from 'react-hot-toast';
 import html2pdf from 'html2pdf.js';
 
@@ -89,6 +90,7 @@ const ViewResume = () => {
     skills: resume.skills || [],
     experience: resume.experience || [],
     projects: resume.projects || [],
+    languages: resume.languages || [],
   } : null;
 
   if (loading) {
@@ -100,9 +102,9 @@ const ViewResume = () => {
   }
 
   return (
-    <div className="min-h-screen pt-16">
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-dark-300">
       {/* Header */}
-      <div className="sticky top-16 z-20 bg-white/80 dark:bg-dark-200/80 backdrop-blur-lg border-b border-gray-200 dark:border-dark-100">
+      <div className="sticky top-0 z-20 bg-white dark:bg-dark-200 border-b border-gray-200 dark:border-dark-100 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-4">
           <div className="flex items-center gap-4">
             <button
@@ -139,14 +141,15 @@ const ViewResume = () => {
         </div>
       </div>
 
-      {/* Content */}
-      <div className="p-4 sm:p-6 overflow-auto">
+      {/* Content - Scrollable */}
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6">
         {resumeData && (
-          <div className="max-w-[210mm] mx-auto">
+          <div className="max-w-[210mm] mx-auto bg-white dark:bg-dark-200 shadow-lg mb-6">
             <ResumePreview resumeData={resumeData} />
           </div>
         )}
       </div>
+
     </div>
   );
 };

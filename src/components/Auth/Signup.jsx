@@ -30,6 +30,22 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validate all fields
+    if (!formData.fullName.trim()) {
+      toast.error('Please enter your full name');
+      return;
+    }
+
+    if (!formData.email.trim()) {
+      toast.error('Please enter your email');
+      return;
+    }
+
+    if (!formData.password) {
+      toast.error('Please enter a password');
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       toast.error('Passwords do not match');
       return;
@@ -43,8 +59,7 @@ const Signup = () => {
     setLoading(true);
 
     try {
-      const { error } = await signUp(formData.email, formData.password);
-      if (error) throw error;
+      await signUp(formData.email, formData.password, formData.fullName);
       toast.success('Account created! Please check your email to verify.');
       navigate('/login');
     } catch (error) {

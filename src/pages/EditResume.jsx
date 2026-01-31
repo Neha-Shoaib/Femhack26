@@ -6,6 +6,7 @@ import { resumeOperations } from '../utils/supabaseClient';
 import { initialResumeData } from '../utils/helpers';
 import ResumeForm from '../components/Resume/ResumeForm';
 import ResumePreview from '../components/Resume/ResumePreview';
+import Footer from '../components/Layout/Footer';
 import toast from 'react-hot-toast';
 
 const EditResume = () => {
@@ -63,16 +64,16 @@ const EditResume = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-16 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-dark-300">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pt-16">
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-dark-300">
       {/* Header */}
-      <div className="sticky top-16 z-20 bg-white/80 dark:bg-dark-200/80 backdrop-blur-lg border-b border-gray-200 dark:border-dark-100">
+      <div className="sticky top-0 z-20 bg-white dark:bg-dark-200 border-b border-gray-200 dark:border-dark-100">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-4">
           <div className="flex items-center gap-4">
             <button
@@ -128,18 +129,21 @@ const EditResume = () => {
         </div>
       </div>
 
-      {/* Content */}
-      <div className="p-4 sm:p-6">
+      {/* Content - Scrollable */}
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6">
         {activeTab === 'form' ? (
           <div className="max-w-4xl mx-auto">
             <ResumeForm resumeData={resumeData} onChange={setResumeData} />
           </div>
         ) : (
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-[210mm] mx-auto bg-white dark:bg-dark-200 shadow-lg">
             <ResumePreview resumeData={resumeData} />
           </div>
         )}
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };
