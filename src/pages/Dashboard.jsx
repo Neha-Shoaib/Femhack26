@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { resumeOperations } from '../utils/supabaseClient';
 import ResumeCard from '../components/Resume/ResumeCard';
 import AddResume from './AddResume';
+import Chatbot from '../components/Chatbot/Chatbot';
 import toast from 'react-hot-toast';
 
 const Dashboard = () => {
@@ -246,6 +247,9 @@ const Dashboard = () => {
           )}
         </section>
       </main>
+      
+      {/* Chatbot - Only show on main dashboard view */}
+      {!showAddForm && <Chatbot />}
     </div>
   );
 };
