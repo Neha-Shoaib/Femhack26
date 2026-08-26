@@ -1,17 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Replace these with your actual Supabase project credentials
+
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://your-project.supabase.co';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Database table name
+
 export const RESUMES_TABLE = 'resumes';
 
-// Helper functions for resume operations
+
 export const resumeOperations = {
-  // Create a new resume
+
   async createResume(userId, resumeData) {
     const { data, error } = await supabase
       .from(RESUMES_TABLE)
@@ -32,7 +32,7 @@ export const resumeOperations = {
     return data;
   },
 
-  // Get all resumes for a user
+
   async getResumes(userId) {
     const { data, error } = await supabase
       .from(RESUMES_TABLE)
@@ -44,7 +44,7 @@ export const resumeOperations = {
     return data;
   },
 
-  // Get a single resume by ID
+
   async getResume(resumeId) {
     const { data, error } = await supabase
       .from(RESUMES_TABLE)
@@ -56,7 +56,7 @@ export const resumeOperations = {
     return data;
   },
 
-  // Update a resume
+  
   async updateResume(resumeId, resumeData) {
     const { data, error } = await supabase
       .from(RESUMES_TABLE)
@@ -78,7 +78,7 @@ export const resumeOperations = {
     return data;
   },
 
-  // Delete a resume
+
   async deleteResume(resumeId) {
     const { error } = await supabase
       .from(RESUMES_TABLE)

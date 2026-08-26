@@ -2,7 +2,7 @@
 
 A professional, responsive Resume Builder web application built with React.js and Supabase. Create, edit, preview, and download professional resumes with ease.
 
-![Resume Builder](https://via.placeholder.com/800x400/3b82f6/ffffff?text=Resume+Builder)
+
 
 ## ✨ Features
 

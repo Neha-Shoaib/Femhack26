@@ -59,7 +59,10 @@ const Signup = () => {
     setLoading(true);
 
     try {
-      await signUp(formData.email, formData.password, formData.fullName);
+      // Directs user to the login page after clicking the confirmation link in the email
+      const redirectTo = `${window.location.origin}/login`;
+
+      await signUp(formData.email, formData.password, formData.fullName, redirectTo);
       toast.success('Account created! Please check your email to verify.');
       navigate('/login');
     } catch (error) {
