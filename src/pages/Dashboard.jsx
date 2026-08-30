@@ -168,7 +168,7 @@ const Dashboard = () => {
         <div className="absolute top-[40%] -right-20 w-[400px] h-[400px] bg-indigo-600/10 blur-[130px] rounded-full" />
       </div>
 
-      <main className="relative z-10 flex-1 flex flex-col max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 lg:pt-16 pt-6 gap-6">
+      <main className="relative z-10 flex-1 flex flex-col max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 lg:pt-5 pt-6 gap-6">
         
         {/* Top Header Card / Welcome Banner */}
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900/95 via-[#0d1527]/90 to-blue-950/40 border border-slate-800/80 p-5 sm:p-7 shadow-xl shadow-black/40">

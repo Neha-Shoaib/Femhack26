@@ -1,176 +1,209 @@
-import { useState, useRef, useEffect } from 'react';
-import { FiMessageCircle, FiX, FiSend, FiMinimize2 } from 'react-icons/fi';
+import React, { useState, useRef, useEffect } from 'react';
+import { 
+  Bot, 
+  User, 
+  Sparkles, 
+  Send, 
+  Trash2, 
+  Minimize2 
+} from 'lucide-react';
 
-const faqResponses = {
-  greeting: ["Hello! 👋 I'm here to help you with your resume. How can I assist you today?", "Hi there! Ready to help you build an amazing resume. What do you need?", "Welcome! Ask me anything about creating or improving your resume."],
-  help: ["I can help you with:\n• Creating a new resume\n• Editing existing resumes\n• Tips for writing compelling content\n• Formatting guidelines\n• Industry-specific advice\n\nWhat would you like to know more about?"],
-  tips: ["Here are some quick tips for your resume:\n\n1. **Keep it concise** - Aim for 1-2 pages\n2. **Use action verbs** - 'Led', 'Created', 'Developed'\n3. **Quantify achievements** - 'Increased sales by 25%'\n4. **Tailor for each job** - Customize for each application\n5. **Proofread carefully** - No spelling or grammar errors\n\nNeed more specific advice?"],
-  format: ["Resume format tips:\n\n• **Reverse chronological** - Most common, shows career progression\n• **Functional** - Skills-focused, good for career changers\n• **Combination** - Best of both worlds\n\nFor most job seekers, reverse chronological works best. Your recent experience matters most!"],
-  skills: ["Highlighting skills effectively:\n\n• List both **technical skills** (software, languages, tools)\n• Include **soft skills** (leadership, communication)\n• Match keywords from the job description\n• Put your most relevant skills at the top\n• Don't just list - show how you used them!\n\nWould you like help identifying your key skills?"],
-  experience: ["Describing work experience:\n\n• Start with a strong action verb\n• Include specific numbers and results\n• Focus on achievements, not just duties\n• Use the STAR method (Situation, Task, Action, Result)\n• Match responsibilities to the job you want\n\nExample: 'Increased customer satisfaction by 30% through implementing a new feedback system'"],
-  education: ["Education section tips:\n\n• Put relevant coursework if you're a recent graduate\n• Include honors (GPA above 3.5, Dean's List)\n• Add certifications and professional development\n• Don't dates if you're worried about age discrimination\n• Only include high school if you have no college experience"],
-  ats: ["ATS (Applicant Tracking System) tips:\n\n• Use standard section headings\n• Avoid tables, graphics, and headers/footers\n• Use keywords from the job posting\n• Submit as .docx or .pdf (check job posting)\n• Don't stuff keywords - use them naturally\n• Keep formatting simple and clean\n\nMost ATS systems can't read complex formatting!"],
-  cover_letter: ["Cover letter advice:\n\n• Customize for each application\n• Show you've researched the company\n• Explain WHY you're a great fit\n• Keep it to one page\n• Focus on what you can do for them\n• End with a clear call to action\n\nNeed help writing a specific cover letter?"],
-  default: ["That's a great question! Here are some things I can help with:\n\n• Creating your first resume\n• Editing and improving existing resumes\n• Resume formatting and layout\n• Writing compelling descriptions\n• Tips for specific industries\n\nTry asking about 'tips', 'format', 'skills', 'experience', or 'ATS' for specific advice!"]
-};
+// Paste your public URL generated from Google Colab here:
+const API_URL = "https://frilly-javon-unvitiating.ngrok-free.dev/api/chat";
 
-const Chatbot = () => {
+export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState([
-    { id: 1, type: 'bot', text: faqResponses.greeting[0] }
+    {
+      role: 'assistant',
+      content: "Hi! I'm CVCraft AI. How can I assist you with your resume, bullet points, or ATS optimization today?"
+    }
   ]);
-  const [inputValue, setInputValue] = useState('');
+
   const messagesEndRef = useRef(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   useEffect(() => {
-    scrollToBottom();
+    if (isOpen) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages, isOpen]);
 
-  const getResponse = (input) => {
-    const lowerInput = input.toLowerCase();
-    
-    if (lowerInput.match(/^(hi|hello|hey|greetings)/)) {
-      return faqResponses.greeting[Math.floor(Math.random() * faqResponses.greeting.length)];
-    }
-    if (lowerInput.match(/help|what can you do|assist|support/)) {
-      return faqResponses.help[0];
-    }
-    if (lowerInput.match(/tip|advice|guideline|best practice/)) {
-      return faqResponses.tips[0];
-    }
-    if (lowerInput.match(/format|layout|style|structure/)) {
-      return faqResponses.format[0];
-    }
-    if (lowerInput.match(/skill|ability|competenc/)) {
-      return faqResponses.skills[0];
-    }
-    if (lowerInput.match(/experience|work history|job/)) {
-      return faqResponses.experience[0];
-    }
-    if (lowerInput.match(/educat|degree|university|school/)) {
-      return faqResponses.education[0];
-    }
-    if (lowerInput.match(/ats|applicant tracking|keyword/)) {
-      return faqResponses.ats[0];
-    }
-    if (lowerInput.match(/cover letter|letter/)) {
-      return faqResponses.cover_letter[0];
-    }
-    return faqResponses.default[0];
-  };
+const handleSend = async (e) => {
+  e?.preventDefault();
+  if (!input.trim() || loading) return;
 
-  const handleSend = () => {
-    if (!inputValue.trim()) return;
+  const userMessage = { role: 'user', content: input.trim() };
+  const updatedMessages = [...messages, userMessage];
 
-    const userMessage = { id: Date.now(), type: 'user', text: inputValue.trim() };
-    setMessages(prev => [...prev, userMessage]);
-    setInputValue('');
+  setMessages(updatedMessages);
+  setInput('');
+  setLoading(true);
 
-    // Simulate bot response delay
-    setTimeout(() => {
-      const botResponse = { id: Date.now() + 1, type: 'bot', text: getResponse(inputValue.trim()) };
-      setMessages(prev => [...prev, botResponse]);
-    }, 600);
-  };
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true' // Bypass ngrok warning page
+      },
+      body: JSON.stringify({
+        messages: updatedMessages.map((m) => ({ role: m.role, content: m.content })),
+      }),
+    });
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`HTTP Status: ${response.status}`, errorText);
+      throw new Error(`Server returned ${response.status}: ${errorText}`);
     }
-  };
 
-  if (!isOpen) {
-    return (
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center justify-center z-50"
-        aria-label="Open chat"
-      >
-        <FiMessageCircle className="w-6 h-6" />
-      </button>
-    );
+    const data = await response.json();
+    setMessages((prev) => [...prev, { role: 'assistant', content: data.reply }]);
+  } catch (err) {
+    console.error('Chat error details:', err);
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: 'assistant',
+        content: `Error connecting: ${err.message || 'Please check Colab logs'}`
+      }
+    ]);
+  } finally {
+    setLoading(false);
   }
+};
+  const handleClear = () => {
+    setMessages([
+      {
+        role: 'assistant',
+        content: "Chat cleared. What resume questions do you have?"
+      }
+    ]);
+  };
 
   return (
-    <div className="fixed bottom-6 right-6 w-96 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl shadow-indigo-500/20 overflow-hidden z-50 flex flex-col animate-slide-up">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-            <FiMessageCircle className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h3 className="text-white font-semibold">Resume Assistant</h3>
-            <p className="text-xs text-white/80">Online • Ready to help</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setIsOpen(false)}
-            className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-            aria-label="Minimize chat"
-          >
-            <FiMinimize2 className="w-5 h-5 text-white" />
-          </button>
-          <button
-            onClick={() => setIsOpen(false)}
-            className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-            aria-label="Close chat"
-          >
-            <FiX className="w-5 h-5 text-white" />
-          </button>
-        </div>
-      </div>
+    <div className="fixed bottom-6 right-6 z-50 font-sans">
+      {/* Floating Toggle Button */}
+      {!isOpen && (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="p-4 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-600/30 hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center ring-2 ring-white/20"
+          aria-label="Open AI Assistant"
+        >
+          <Sparkles className="h-6 w-6 text-white" />
+        </button>
+      )}
 
-      {/* Messages */}
-      <div className="flex-1 h-80 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-gray-900">
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
-            <div
-              className={`max-w-[85%] p-3 rounded-2xl ${
-                message.type === 'user'
-                  ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-tr-sm'
-                  : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-tl-sm shadow-sm'
-              }`}
-            >
-              <p className="text-sm whitespace-pre-line">{message.text}</p>
+      {/* Floating Chat Window */}
+      {isOpen && (
+        <div className="w-[90vw] sm:w-[380px] h-[500px] rounded-2xl bg-[#0b111e] border border-slate-800 shadow-2xl flex flex-col overflow-hidden text-slate-100">
+          {/* Header */}
+          <div className="px-4 py-3 bg-[#0e1626] border-b border-slate-800 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="h-7 w-7 rounded-lg bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                <Bot className="h-4 w-4" />
+              </div>
+              <div>
+                <h3 className="text-xs font-bold text-white">CVCraft AI</h3>
+                <p className="text-[10px] text-slate-400">Resume Consultant</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1">
+              <button
+                onClick={handleClear}
+                className="p-1.5 rounded text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition-colors"
+                title="Clear Chat"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="p-1.5 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                title="Close"
+              >
+                <Minimize2 className="h-3.5 w-3.5" />
+              </button>
             </div>
           </div>
-        ))}
-        <div ref={messagesEndRef} />
-      </div>
 
-      {/* Input */}
-      <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-        <div className="flex items-center gap-2">
-          <input
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Ask about resumes..."
-            className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-white placeholder-gray-500"
-          />
-          <button
-            onClick={handleSend}
-            disabled={!inputValue.trim()}
-            className="p-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-            aria-label="Send message"
-          >
-            <FiSend className="w-5 h-5" />
-          </button>
+          {/* Quick Shortcuts */}
+          <div className="px-3 py-2 bg-slate-950/40 border-b border-slate-800/50 flex gap-2 overflow-x-auto text-[11px]">
+            <button
+              onClick={() => setInput("How do I make my resume ATS-friendly?")}
+              className="px-2.5 py-1 rounded-full bg-slate-900 border border-slate-800 text-slate-300 hover:border-blue-500/40 whitespace-nowrap"
+            >
+              🎯 ATS Tips
+            </button>
+            <button
+              onClick={() => setInput("Rewrite this bullet point to show quantifiable impact: ")}
+              className="px-2.5 py-1 rounded-full bg-slate-900 border border-slate-800 text-slate-300 hover:border-blue-500/40 whitespace-nowrap"
+            >
+              ✍️ Improve Bullet
+            </button>
+          </div>
+
+          {/* Messages Area */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 text-xs">
+            {messages.map((msg, index) => (
+              <div
+                key={index}
+                className={`flex gap-2.5 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                {msg.role === 'assistant' && (
+                  <div className="h-6 w-6 rounded bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0 mt-0.5">
+                    <Bot className="h-3.5 w-3.5" />
+                  </div>
+                )}
+                <div
+                  className={`p-3 rounded-xl max-w-[80%] leading-relaxed whitespace-pre-wrap ${
+                    msg.role === 'user'
+                      ? 'bg-blue-600 text-white rounded-tr-none'
+                      : 'bg-slate-900 border border-slate-800 text-slate-200 rounded-tl-none'
+                  }`}
+                >
+                  {msg.content}
+                </div>
+                {msg.role === 'user' && (
+                  <div className="h-6 w-6 rounded bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 shrink-0 mt-0.5">
+                    <User className="h-3.5 w-3.5" />
+                  </div>
+                )}
+              </div>
+            ))}
+
+            {loading && (
+              <div className="flex gap-2 items-center text-slate-400 text-xs">
+                <span className="h-1.5 w-1.5 bg-blue-500 rounded-full animate-pulse" />
+                <span className="h-1.5 w-1.5 bg-blue-500 rounded-full animate-pulse delay-150" />
+                <span className="h-1.5 w-1.5 bg-blue-500 rounded-full animate-pulse delay-300" />
+                <span>Thinking...</span>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input Field */}
+          <form onSubmit={handleSend} className="p-3 bg-[#0e1626] border-t border-slate-800 flex items-center gap-2">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask about resumes, bullet points..."
+              className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+            <button
+              type="submit"
+              disabled={loading || !input.trim()}
+              className="p-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-xl transition-colors"
+            >
+              <Send className="h-3.5 w-3.5" />
+            </button>
+          </form>
         </div>
-      </div>
+      )}
     </div>
   );
-};
-
-export default Chatbot;
+}
