@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
   const signUp = async (email, password, fullName, redirectTo) => {
     const defaultRedirect = `${window.location.origin}/login`;
 
-    const { data, error } = await supabase.auth.signUp({
+    const response = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -42,25 +42,10 @@ export const AuthProvider = ({ children }) => {
       },
     });
 
-    if (error) throw error;
-
-    // Create a profile record if session is active or user object returned
-    if (data?.user) {
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert({
-          id: data.user.id,
-          email: email,
-          full_name: fullName,
-          updated_at: new Date().toISOString(),
-        });
-
-      if (profileError) {
-        console.warn('Profile creation deferred (likely waiting for email verification RLS):', profileError.message);
-      }
-    }
-
-    return data;
+    if (response.error) throw response.error;
+    
+    // Returns full response with data and identities array for duplicate checks
+    return response;
   };
 
   const signIn = async (email, password) => {

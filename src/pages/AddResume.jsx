@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FiX, FiSave, FiTrash2, FiLayout, FiCheck } from 'react-icons/fi';
+import { FiX, FiSave, FiTrash2, FiLayout, FiCheck, FiEye, FiEdit2 } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import { resumeOperations } from '../utils/supabaseClient';
 import { initialResumeData } from '../utils/helpers';
@@ -109,7 +109,7 @@ const AddResume = ({ isOpen, onClose, onSave, inline = false }) => {
   // Inline mode wrapper
   if (inline) {
     return (
-      <div className="h-full flex flex-col bg-white dark:bg-dark-200">
+      <div className="h-full flex flex-col bg-white dark:bg-dark-200 relative">
         {/* Header */}
         <div className="flex flex-col flex-shrink-0 border-b border-gray-200 dark:border-dark-100">
           <div className="flex items-center justify-between p-4">
@@ -124,26 +124,30 @@ const AddResume = ({ isOpen, onClose, onSave, inline = false }) => {
             </button>
           </div>
           
-          {/* Action buttons */}
+          {/* Action buttons (Top Bar) */}
           <div className="flex items-center justify-between p-4 gap-2 flex-wrap">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <button
                 onClick={handleClearDraft}
                 className="btn-secondary text-sm flex items-center gap-2"
                 title="Clear saved draft"
               >
                 <FiTrash2 className="w-4 h-4" />
-                Clear
+                <span className="hidden sm:inline">Clear</span>
               </button>
               <button
                 onClick={() => setShowTemplateSelector(!showTemplateSelector)}
                 className={`btn-secondary text-sm flex items-center gap-2 ${showTemplateSelector ? 'bg-primary-100 dark:bg-primary-900/30' : ''}`}
               >
                 <FiLayout className="w-4 h-4" />
-                Template: {resumeTemplates.find(t => t.id === selectedTemplate)?.name}
+                <span className="truncate max-w-[140px] sm:max-w-none">
+                  Template: {resumeTemplates.find(t => t.id === selectedTemplate)?.name}
+                </span>
               </button>
             </div>
-            <div className="flex items-center gap-2">
+            
+            {/* Desktop Action Buttons */}
+            <div className="hidden md:flex items-center gap-2">
               <button
                 onClick={() => setActiveTab(activeTab === 'form' ? 'preview' : 'form')}
                 className="btn-secondary text-sm"
@@ -215,19 +219,48 @@ const AddResume = ({ isOpen, onClose, onSave, inline = false }) => {
           </div>
         </div>
 
-        {/* Content - Scrollable */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-6">
+        {/* Content - Scrollable (adds bottom padding on mobile for sticky bar) */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-24 md:pb-6">
           {activeTab === 'form' ? (
             <ResumeForm resumeData={resumeData} onChange={setResumeData} />
           ) : (
             <ResumePreview resumeData={resumeData} template={selectedTemplate} />
           )}
         </div>
+
+        {/* Mobile Sticky Floating Bottom Save/Action Bar */}
+        <div className="md:hidden sticky bottom-0 left-0 right-0 z-30 p-3 bg-white/95 dark:bg-dark-200/95 backdrop-blur-md border-t border-gray-200 dark:border-dark-100 shadow-lg flex items-center justify-between gap-2.5">
+          <button
+            onClick={() => setActiveTab(activeTab === 'form' ? 'preview' : 'form')}
+            className="btn-secondary flex-1 py-2.5 text-xs flex items-center justify-center gap-1.5"
+          >
+            {activeTab === 'form' ? (
+              <>
+                <FiEye className="w-4 h-4" />
+                Preview
+              </>
+            ) : (
+              <>
+                <FiEdit2 className="w-4 h-4" />
+                Edit Form
+              </>
+            )}
+          </button>
+          
+          <button
+            onClick={handleSave}
+            disabled={loading}
+            className="btn-primary flex-[1.5] py-2.5 text-xs font-semibold flex items-center justify-center gap-2 shadow-md shadow-primary-600/25"
+          >
+            <FiSave className="w-4 h-4" />
+            {loading ? 'Saving...' : 'Save Resume'}
+          </button>
+        </div>
       </div>
     );
   }
 
-  // Slide-over mode (original)
+  // Slide-over mode
   return (
     <>
       {/* Overlay backdrop */}
@@ -242,15 +275,13 @@ const AddResume = ({ isOpen, onClose, onSave, inline = false }) => {
       <div className={`fixed top-0 right-0 h-full w-full md:w-[480px] lg:w-[560px] bg-white dark:bg-dark-200 shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
         isOpen ? 'translate-x-0' : 'translate-x-full'
       }`}>
-        <div className="h-full flex flex-col">
+        <div className="h-full flex flex-col relative">
           {/* Header */}
-          <div className="flex flex-col">
+          <div className="flex flex-col flex-shrink-0">
             <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-dark-100">
-              <div className="flex items-center gap-4">
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                  Create Resume
-                </h1>
-              </div>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+                Create Resume
+              </h1>
               <button
                 onClick={onClose}
                 className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-100 transition-colors"
@@ -259,7 +290,7 @@ const AddResume = ({ isOpen, onClose, onSave, inline = false }) => {
               </button>
             </div>
             
-            {/* Action buttons */}
+            {/* Action buttons (Top) */}
             <div className="flex items-center justify-between p-4 gap-2 flex-wrap border-b border-gray-200 dark:border-dark-100">
               <div className="flex items-center gap-2">
                 <button
@@ -270,21 +301,25 @@ const AddResume = ({ isOpen, onClose, onSave, inline = false }) => {
                   <FiTrash2 className="w-4 h-4" />
                   Clear
                 </button>
+              </div>
+
+              {/* Desktop Save & Preview buttons */}
+              <div className="hidden md:flex items-center gap-2">
                 <button
                   onClick={() => setActiveTab(activeTab === 'form' ? 'preview' : 'form')}
                   className="btn-secondary text-sm"
                 >
                   {activeTab === 'form' ? 'Preview' : 'Edit'}
                 </button>
+                <button
+                  onClick={handleSave}
+                  disabled={loading}
+                  className="btn-primary flex items-center gap-2"
+                >
+                  <FiSave className="w-4 h-4" />
+                  {loading ? 'Saving...' : 'Save'}
+                </button>
               </div>
-              <button
-                onClick={handleSave}
-                disabled={loading}
-                className="btn-primary flex items-center gap-2"
-              >
-                <FiSave className="w-4 h-4" />
-                {loading ? 'Saving...' : 'Save'}
-              </button>
             </div>
             
             {/* Tab Buttons */}
@@ -313,12 +348,41 @@ const AddResume = ({ isOpen, onClose, onSave, inline = false }) => {
           </div>
 
           {/* Content - Scrollable */}
-          <div className="flex-1 overflow-y-auto p-4 md:p-6">
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-24 md:pb-6">
             {activeTab === 'form' ? (
               <ResumeForm resumeData={resumeData} onChange={setResumeData} />
             ) : (
               <ResumePreview resumeData={resumeData} />
             )}
+          </div>
+
+          {/* Mobile Sticky Floating Bottom Save/Action Bar */}
+          <div className="md:hidden sticky bottom-0 left-0 right-0 z-30 p-3 bg-white/95 dark:bg-dark-200/95 backdrop-blur-md border-t border-gray-200 dark:border-dark-100 shadow-lg flex items-center justify-between gap-2.5">
+            <button
+              onClick={() => setActiveTab(activeTab === 'form' ? 'preview' : 'form')}
+              className="btn-secondary flex-1 py-2.5 text-xs flex items-center justify-center gap-1.5"
+            >
+              {activeTab === 'form' ? (
+                <>
+                  <FiEye className="w-4 h-4" />
+                  Preview
+                </>
+              ) : (
+                <>
+                  <FiEdit2 className="w-4 h-4" />
+                  Edit Form
+                </>
+              )}
+            </button>
+            
+            <button
+              onClick={handleSave}
+              disabled={loading}
+              className="btn-primary flex-[1.5] py-2.5 text-xs font-semibold flex items-center justify-center gap-2 shadow-md shadow-primary-600/25"
+            >
+              <FiSave className="w-4 h-4" />
+              {loading ? 'Saving...' : 'Save Resume'}
+            </button>
           </div>
         </div>
       </div>

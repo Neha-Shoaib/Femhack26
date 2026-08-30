@@ -8,19 +8,20 @@ import Sidebar from './components/Layout/Sidebar';
 import Footer from './components/Layout/Footer';
 import Login from './components/Auth/Login';
 import Signup from './components/Auth/Signup';
+import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
 import EditResume from './pages/EditResume';
 import ViewResume from './pages/ViewResume';
 import AuthCallback from './pages/AuthCallback';
 
-// Protected Route Component
+// Protected Route Guard
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-gray-50 dark:bg-dark-300">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="h-screen w-screen flex items-center justify-center bg-[#090D16]">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
       </div>
     );
   }
@@ -32,44 +33,48 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-// Layout Component for authenticated pages
+// Unified Responsive Dashboard Layout
 const AuthenticatedLayout = ({ children }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  // Sidebar state: controls collapse on desktop & drawer on mobile
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-gray-50 dark:bg-dark-300">
+    <div className="h-screen w-full flex flex-col bg-[#090D16] text-slate-100 overflow-hidden font-sans">
+      {/* 1. Global Header with Hamburger / Collapse Trigger */}
       <Header 
         isSidebarOpen={isSidebarOpen} 
-        setIsSidebarOpen={setIsSidebarOpen}
+        onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
       />
-      <div className="flex flex-1 overflow-hidden">
-        <Sidebar isSidebarOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-        <main className="flex-1 overflow-hidden flex flex-col">
-          <div className="flex-1 overflow-auto">
+
+      {/* 2. Workspace Body: Collapsible Sidebar + Content */}
+      <div className="flex flex-1 overflow-hidden relative">
+        <Sidebar 
+          isSidebarOpen={isSidebarOpen} 
+          onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
+          onClose={() => setIsSidebarOpen(false)}
+        />
+
+        {/* 3. Main Content & Footer Area */}
+        <div className="flex-1 overflow-y-auto flex flex-col justify-between bg-[#090D16]">
+          <main className="flex-1 w-full">
             {children}
-          </div>
+          </main>
+          
           <Footer />
-        </main>
+        </div>
       </div>
     </div>
   );
 };
 
-// Unauthenticated Layout
-const UnauthenticatedLayout = ({ children }) => {
-  return children;
-};
+const UnauthenticatedLayout = ({ children }) => children;
 
-// Wrapper that includes sidebar state
 const AuthenticatedLayoutWrapper = () => {
   const location = useLocation();
   
-  // Determine which component to render based on path
   const getComponent = () => {
     const path = location.pathname;
-    if (path === '/dashboard' || path === '/settings') {
-      return <Dashboard />;
-    }
+    if (path === '/dashboard' || path === '/settings') return <Dashboard />;
     if (path === '/add-resume') return <Dashboard />;
     if (path.startsWith('/edit-resume/')) return <EditResume />;
     if (path.startsWith('/view-resume/')) return <ViewResume />;
@@ -88,87 +93,58 @@ const AppRoutes = () => {
 
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-gray-50 dark:bg-dark-300">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="h-screen flex items-center justify-center bg-[#090D16]">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
   return (
     <Routes>
-      {/* Public Routes */}
+      <Route
+        path="/"
+        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LandingPage />}
+      />
       <Route
         path="/login"
         element={
-          isAuthenticated ? (
-            <Navigate to="/dashboard" replace />
-          ) : (
-            <UnauthenticatedLayout>
-              <Login />
-            </UnauthenticatedLayout>
+          isAuthenticated ? <Navigate to="/dashboard" replace /> : (
+            <UnauthenticatedLayout><Login /></UnauthenticatedLayout>
           )
         }
       />
       <Route
         path="/signup"
         element={
-          isAuthenticated ? (
-            <Navigate to="/dashboard" replace />
-          ) : (
-            <UnauthenticatedLayout>
-              <Signup />
-            </UnauthenticatedLayout>
+          isAuthenticated ? <Navigate to="/dashboard" replace /> : (
+            <UnauthenticatedLayout><Signup /></UnauthenticatedLayout>
           )
         }
       />
-      
-      {/* Auth Callback */}
       <Route path="/auth/callback" element={<AuthCallback />} />
 
-      {/* Protected Routes */}
       <Route
         path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <AuthenticatedLayoutWrapper />
-          </ProtectedRoute>
-        }
+        element={<ProtectedRoute><AuthenticatedLayoutWrapper /></ProtectedRoute>}
       />
       <Route
         path="/settings"
-        element={
-          <ProtectedRoute>
-            <AuthenticatedLayoutWrapper />
-          </ProtectedRoute>
-        }
+        element={<ProtectedRoute><AuthenticatedLayoutWrapper /></ProtectedRoute>}
       />
       <Route
         path="/edit-resume/:id"
-        element={
-          <ProtectedRoute>
-            <AuthenticatedLayoutWrapper />
-          </ProtectedRoute>
-        }
+        element={<ProtectedRoute><AuthenticatedLayoutWrapper /></ProtectedRoute>}
       />
       <Route
         path="/view-resume/:id"
-        element={
-          <ProtectedRoute>
-            <AuthenticatedLayoutWrapper />
-          </ProtectedRoute>
-        }
+        element={<ProtectedRoute><AuthenticatedLayoutWrapper /></ProtectedRoute>}
       />
-
-      {/* Redirect root to dashboard */}
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      
-      {/* 404 */}
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };
 
-const App = () => {
+export default function App() {
   return (
     <BrowserRouter>
       <ThemeProvider>
@@ -179,23 +155,12 @@ const App = () => {
             toastOptions={{
               duration: 3000,
               style: {
-                background: '#fff',
-                color: '#363636',
-                boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
-                borderRadius: '12px',
-                padding: '16px',
-              },
-              success: {
-                iconTheme: {
-                  primary: '#10b981',
-                  secondary: '#fff',
-                },
-              },
-              error: {
-                iconTheme: {
-                  primary: '#ef4444',
-                  secondary: '#fff',
-                },
+                background: '#0d1424',
+                color: '#fff',
+                border: '1px solid rgba(59, 130, 246, 0.2)',
+                borderRadius: '10px',
+                padding: '12px',
+                fontSize: '13px',
               },
             }}
           />
@@ -203,6 +168,4 @@ const App = () => {
       </ThemeProvider>
     </BrowserRouter>
   );
-};
-
-export default App;
+}

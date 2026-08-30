@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { FiArrowLeft, FiEdit2, FiDownload } from 'react-icons/fi';
+import { FiArrowLeft, FiEdit2, FiDownload, FiCheckCircle } from 'react-icons/fi';
 import { resumeOperations } from '../utils/supabaseClient';
 import ResumePreview from '../components/Resume/ResumePreview';
-import Footer from '../components/Layout/Footer';
 import toast from 'react-hot-toast';
 import html2pdf from 'html2pdf.js';
 
@@ -22,7 +21,6 @@ const ViewResume = () => {
   useEffect(() => {
     if (searchParams.get('action') === 'download' && resume) {
       handleDownload();
-     
       window.history.replaceState({}, '', `/view-resume/${id}`);
     }
   }, [resume, searchParams]);
@@ -55,18 +53,26 @@ const ViewResume = () => {
         return;
       }
 
-      const fileName = resume.personal_info?.fullName?.replace(/\s+/g, '-') || 'resume';
+      const candidateName = resume?.personal_info?.fullName?.trim() || 'Resume';
+      const cleanFileName = candidateName.replace(/[^a-zA-Z0-9_-]/g, '_');
       
+      // ATS-optimized pdf generation settings
       const opt = {
-        margin: 0,
-        filename: `${fileName}.pdf`,
+        margin: [8, 8, 8, 8],
+        filename: `${cleanFileName}_Resume.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
+        html2canvas: { 
+          scale: 3, 
+          useCORS: true, 
+          letterRendering: true,
+          scrollY: 0 
+        },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
       };
 
       await html2pdf().set(opt).from(element).save();
-      toast.success('Resume downloaded successfully!');
+      toast.success('ATS-Optimized PDF downloaded successfully!');
     } catch (error) {
       console.error('Download error:', error);
       toast.error('Failed to download resume');
@@ -95,61 +101,85 @@ const ViewResume = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-16 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-[#090D16]">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-dark-300">
-      {/* Header */}
-      <div className="sticky top-0 z-20 bg-white dark:bg-dark-200 border-b border-gray-200 dark:border-dark-100 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-4">
-          <div className="flex items-center gap-4">
+    <div className="min-h-screen flex flex-col bg-[#090D16] text-slate-100 font-sans selection:bg-blue-600 selection:text-white">
+      {/* Top Controls Bar */}
+      <header className="sticky top-0 z-30 bg-[#090D16]/90 backdrop-blur-xl border-b border-slate-800/80 shadow-md">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          
+          {/* Left Title and Back Button */}
+          <div className="flex items-center gap-3">
             <button
               onClick={() => navigate('/dashboard')}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-100 transition-colors"
+              className="p-2 rounded-xl bg-slate-800/70 border border-slate-700/60 hover:bg-slate-700 hover:border-slate-600 text-slate-300 hover:text-white transition-all duration-200"
+              aria-label="Back to dashboard"
             >
-              <FiArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+              <FiArrowLeft className="w-5 h-5" />
             </button>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white truncate">
-              {resume?.personal_info?.fullName || 'Resume Preview'}
-            </h1>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-base sm:text-lg font-bold text-white tracking-tight truncate max-w-[200px] sm:max-w-xs">
+                  {resume?.personal_info?.fullName || 'Resume Preview'}
+                </h1>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  <FiCheckCircle className="w-3 h-3" />
+                  ATS Ready
+                </span>
+              </div>
+              <p className="text-xs text-slate-400">Standard A4 Format • Clean Parser Structure</p>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
+
+          {/* Right Action Buttons */}
+          <div className="flex items-center gap-2.5">
             <button
               onClick={() => navigate(`/edit-resume/${id}`)}
-              className="btn-secondary flex items-center gap-2"
+              className="px-4 py-2 bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-slate-300 hover:text-white text-xs sm:text-sm font-medium rounded-xl transition-all duration-200 flex items-center gap-2 shadow-sm"
             >
-              <FiEdit2 className="w-4 h-4" />
-              Edit
+              <FiEdit2 className="w-4 h-4 text-blue-400" />
+              <span>Edit</span>
             </button>
+
             <button
               onClick={handleDownload}
               disabled={downloading}
-              className="btn-primary flex items-center gap-2"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-lg shadow-blue-600/25 hover:shadow-blue-500/40 transition-all duration-200 flex items-center gap-2 active:scale-95"
             >
               {downloading ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>Exporting...</span>
+                </>
               ) : (
-                <FiDownload className="w-4 h-4" />
+                <>
+                  <FiDownload className="w-4 h-4" />
+                  <span>Download PDF</span>
+                </>
               )}
-              {downloading ? 'Downloading...' : 'Download PDF'}
             </button>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Content  */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+      {/* Main Resume Canvas Container */}
+      <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 flex justify-center items-start">
         {resumeData && (
-          <div className="max-w-[210mm] mx-auto bg-white dark:bg-dark-200 shadow-lg mb-6">
-            <ResumePreview resumeData={resumeData} />
+          <div className="w-full max-w-[210mm] bg-white text-slate-900 rounded-lg shadow-2xl overflow-hidden border border-slate-700/30 p-2 sm:p-4">
+            <div className="resume-preview bg-white w-full">
+              <ResumePreview 
+                resumeData={resumeData} 
+                template={resume?.template || 'modern'} 
+              />
+            </div>
           </div>
         )}
-      </div>
-
+      </main>
     </div>
   );
 };
