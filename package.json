@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.93.3",
+    "groq-sdk": "^1.6.0",
     "html2pdf.js": "^0.10.1",
     "jspdf": "^2.5.1",
     "lucide-react": "^1.37.0",

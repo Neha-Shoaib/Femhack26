@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 
 // Paste your public URL generated from Google Colab here:
-const API_URL = "https://frilly-javon-unvitiating.ngrok-free.dev/api/chat";
+const API_URL = "/api/chat";
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -45,8 +45,7 @@ const handleSend = async (e) => {
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: { 
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true' // Bypass ngrok warning page
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         messages: updatedMessages.map((m) => ({ role: m.role, content: m.content })),
