@@ -366,7 +366,6 @@ const Dashboard = () => {
         </section>
       </main>
 
-      {/* Chatbot - Only show on main dashboard view */}
       {!showAddForm && <Chatbot />}
     </div>
   );

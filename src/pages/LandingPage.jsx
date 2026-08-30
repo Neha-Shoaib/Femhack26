@@ -12,6 +12,8 @@ import {
   Star,
   Eye
 } from 'lucide-react';
+import Chatbot from '../components/Chatbot/Chatbot';
+
 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -544,7 +546,7 @@ export default function LandingPage() {
             </div>
           </div>
         </footer>
-
+ <Chatbot />
       </div>
     </div>
   );
