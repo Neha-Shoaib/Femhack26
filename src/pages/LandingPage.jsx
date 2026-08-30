@@ -225,9 +225,9 @@ export default function LandingPage() {
                     {/* Right Document Preview */}
                     <div className="lg:col-span-7 bg-white text-slate-900 rounded-lg p-5 sm:p-6 shadow-inner text-left font-sans">
                       <div className="border-b-2 border-slate-900 pb-2.5 mb-3">
-                        <h3 className="text-lg sm:text-xl font-bold text-slate-900">ALEX MORGAN</h3>
+                        <h3 className="text-lg sm:text-xl font-bold text-slate-900">NEHA SHOAIB</h3>
                         <p className="text-xs font-semibold text-blue-700 tracking-wide mt-0.5">SENIOR FULL STACK ENGINEER</p>
-                        <p className="text-[11px] text-slate-500 mt-1">alex.morgan@email.com • +1 (555) 019-2834 • San Francisco, CA</p>
+                        <p className="text-[11px] text-slate-500 mt-1">abcd@email.com • +92 333 xxxxxxxx • Karachi, Pakistan</p>
                       </div>
                       
                       <div className="space-y-2.5">
