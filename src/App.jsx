@@ -8,6 +8,9 @@ import Sidebar from './components/Layout/Sidebar';
 import Footer from './components/Layout/Footer';
 import Login from './components/Auth/Login';
 import Signup from './components/Auth/Signup';
+import ForgotPasswordModal from '../src/components/Layout/ForgotPasswordModal';
+import ResetPassword from '../src/pages/ResetPassword';
+import Chatbot from '../src/components/Chatbot/Chatbot';
 import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
 import EditResume from './pages/EditResume';
@@ -35,18 +38,17 @@ const ProtectedRoute = ({ children }) => {
 
 // Unified Responsive Dashboard Layout
 const AuthenticatedLayout = ({ children }) => {
-  // Sidebar state: controls collapse on desktop & drawer on mobile
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   return (
     <div className="h-screen w-full flex flex-col bg-[#090D16] text-slate-100 overflow-hidden font-sans">
-      {/* 1. Global Header with Hamburger / Collapse Trigger */}
+      {/* Global Header */}
       <Header 
         isSidebarOpen={isSidebarOpen} 
         onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
       />
 
-      {/* 2. Workspace Body: Collapsible Sidebar + Content */}
+      {/* Workspace Body: Collapsible Sidebar + Content */}
       <div className="flex flex-1 overflow-hidden relative">
         <Sidebar 
           isSidebarOpen={isSidebarOpen} 
@@ -54,7 +56,7 @@ const AuthenticatedLayout = ({ children }) => {
           onClose={() => setIsSidebarOpen(false)}
         />
 
-        {/* 3. Main Content & Footer Area */}
+        {/* Main Content & Footer Area */}
         <div className="flex-1 overflow-y-auto flex flex-col justify-between bg-[#090D16]">
           <main className="flex-1 w-full">
             {children}
@@ -121,6 +123,29 @@ const AppRoutes = () => {
           )
         }
       />
+
+      {/* Forgot Password Route */}
+      <Route
+        path="/forgot-password"
+        element={
+          isAuthenticated ? <Navigate to="/dashboard" replace /> : (
+            <UnauthenticatedLayout>
+              <ForgotPasswordModal isOpen={true} onClose={() => window.history.back()} />
+            </UnauthenticatedLayout>
+          )
+        }
+      />
+
+      {/* Supabase Password Reset Callback Route */}
+      <Route
+        path="/reset-password"
+        element={
+          <UnauthenticatedLayout>
+            <ResetPassword />
+          </UnauthenticatedLayout>
+        }
+      />
+
       <Route path="/auth/callback" element={<AuthCallback />} />
 
       <Route
@@ -150,6 +175,10 @@ export default function App() {
       <ThemeProvider>
         <AuthProvider>
           <AppRoutes />
+
+          {/* 24/7 AI Floating Chatbot Component */}
+          <Chatbot />
+
           <Toaster
             position="top-right"
             toastOptions={{

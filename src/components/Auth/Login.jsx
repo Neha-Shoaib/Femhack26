@@ -3,12 +3,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
+import ForgotPasswordModal from '../Layout/ForgotPasswordModal';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
+
   const { signIn, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
 
@@ -27,13 +30,14 @@ const Login = () => {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    setLoading(true);
+  const handleGoogleLogin = async () => {
     try {
+      setLoading(true);
       await signInWithGoogle();
-      toast.success('Redirecting to Google...');
-    } catch (error) {
-      toast.error(error.message || 'Failed to sign in with Google');
+    } catch (err) {
+      console.error('Google login error:', err);
+      toast.error(err.message || 'Failed to sign in with Google');
+    } finally {
       setLoading(false);
     }
   };
@@ -98,14 +102,15 @@ const Login = () => {
               </div>
             </div>
 
-            {/* Forgot Password Link */}
+            {/* Forgot Password Link / Trigger */}
             <div className="text-right">
-              <Link
-                to="/forgot-password"
+              <button
+                type="button"
+                onClick={() => setIsForgotModalOpen(true)}
                 className="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium transition-colors"
               >
                 Forgot password?
-              </Link>
+              </button>
             </div>
 
             {/* Submit Button */}
@@ -137,9 +142,9 @@ const Login = () => {
             {/* Google Sign In */}
             <button
               type="button"
-              onClick={handleGoogleSignIn}
+              onClick={handleGoogleLogin}
               disabled={loading}
-              className="w-full py-3 px-4 border-2 border-gray-300 dark:border-dark-100 rounded-xl hover:bg-gray-50 dark:hover:bg-dark-100 transition-all duration-300 flex items-center justify-center gap-3 font-medium text-gray-700 dark:text-gray-200"
+              className="w-full py-3 px-4 border-2 border-gray-300 dark:border-dark-100 rounded-xl hover:bg-gray-50 dark:hover:bg-dark-100 transition-all duration-300 flex items-center justify-center gap-3 font-medium text-gray-700 dark:text-gray-200 disabled:opacity-50"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -163,6 +168,12 @@ const Login = () => {
           </p>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      <ForgotPasswordModal
+        isOpen={isForgotModalOpen}
+        onClose={() => setIsForgotModalOpen(false)}
+      />
     </div>
   );
 };
